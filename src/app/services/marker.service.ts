@@ -1,14 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import * as L from 'leaflet';
+import { PopupService } from './popup.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MarkerService {
-  public capitalsUrl: string = '/assets/data/usa-capitals.geojson';
+  public capitalsUrl: string = '/assets/data/usa-capitals.json';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private popupService: PopupService) { }
 
   public makeCapitalMarkers(map: L.Map): void {
     this.http.get(this.capitalsUrl).subscribe((result: GeoJSON) => {
@@ -17,7 +18,7 @@ export class MarkerService {
         const lat = c.geometry.coordinates[1];
 
         let marker = L.marker([ lat, log ]);
-
+        marker.bindPopup(this.popupService.makeCapitalPopups(c));
         marker.addTo(map);
       }
     });
@@ -30,9 +31,9 @@ export class MarkerService {
         const lat = c.geometry.coordinates[1];
 
         let circleMarker = L.circleMarker([ lat, log ], {
-          radius: 20 * (c.properties.population / 1000000)
+          radius: 20 * (c.properties.population / 999000)
         });
-
+        circleMarker.bindPopup(this.popupService.makeCapitalPopups(c));
         circleMarker.addTo(map);
       }
     });
